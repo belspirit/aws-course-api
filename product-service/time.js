@@ -32,7 +32,7 @@ export async function getTimestamp() {
       log.error(`Error when trying to get current timestamp`);
     }
 
-    return timeResponse.data;
+    return timeResponse.data.datetime;
   } catch (err) {
     log.error(`Error when trying to get current timestamp: ${err.message}`);
   }

@@ -15,7 +15,7 @@ export const getProductsList = async event => {
     headers: {
       "content-type": "application/json",
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Credentials": true,
     },
     body: JSON.stringify({ ok: true, products, timestamp }),
   };

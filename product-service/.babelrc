@@ -1,13 +1,13 @@
 {
   "presets": [
     [
-      //"@babel/preset-env",
-      "env",
+      "@babel/preset-env",
       {
         "targets": {
           "node": "8.10"
         }
       }
     ]
-  ]
+  ],
+  "plugins": ["@babel/plugin-transform-runtime"]
 }

@@ -11,7 +11,7 @@ Frontend application is integrated with product service (/products API) and prod
 - +1 - Async/await is used in lambda functions
 - +1 - ES6 modules are used for product-service implementation
 - +1 - Webpack is configured for product-service
-- 0 - SWAGGER documentation is created for product-service
+- +1 - SWAGGER documentation is created for product-service
 - +1 - Lambda handlers are covered by basic UNIT tests (NO infrastructure logic is needed to be covered)
 - +1 - Lambda handlers (getProductsList, getProductsById) code is written not in 1 single module (file) and separated in codebase.
 - +1 - Main error scenarious are handled by API ("Product not found" error).
@@ -20,7 +20,7 @@ Link to product-service API: https://n4w7ktp7nk.execute-api.us-east-1.amazonaws.
 
 LInk to FE MR (YOUR OWN REPOSITORY): https://github.com/belspirit/shop-react-redux-cloudfront/pulls
 
-SWAGGER - in progress
+SWAGGER: https://app.swaggerhub.com/apis-docs/labetik-aws-course/product-service/1.0.0
 
 ### Get all products:
 

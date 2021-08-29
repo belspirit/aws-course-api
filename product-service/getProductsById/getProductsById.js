@@ -14,7 +14,7 @@ export const getProductsById = async event => {
     headers: {
       "content-type": "application/json",
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Credentials": true,
     },
     statusCode: 200,
   };
@@ -33,6 +33,7 @@ export const getProductsById = async event => {
 
   const product = products.find(p => p.id == productId);
   if (product === undefined) {
+    log.info(`Product ID not found on getProductsById`);
     return merge(response, {
       statusCode: 404,
       body: JSON.stringify({

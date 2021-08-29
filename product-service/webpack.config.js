@@ -6,6 +6,7 @@ const path = require("path");
 module.exports = {
   context: __dirname,
   mode: slsw.lib.webpack.isLocal ? "development" : "production",
+  target: "node",
   entry: slsw.lib.entries,
   devtool: slsw.lib.webpack.isLocal ? "eval-cheap-module-source-map" : "source-map",
   output: {
@@ -20,6 +21,7 @@ module.exports = {
     rules: [
       {
         exclude: [/node_modules/, /\.(test|spec)\.js/],
+        include: __dirname,
         loader: "babel-loader",
         test: /\.jsx?$/,
         options: {
