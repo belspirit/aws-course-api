@@ -1,54 +1,59 @@
 "use strict";
 import merge from "lodash/merge";
-import log from "winston";
-import products from "../products.json";
-import time from "../time";
+//import time from "../time";
+import util from "util";
+import corsResponse from "../corsResponse";
+import log from "../logger";
+import { query } from "../PostgresClient";
 
 export const getProductsById = async event => {
+  log.info(`getProductsById function is called with args: ${util.inspect(event)}`);
   let { id: productId } = event.pathParameters || {};
   if (typeof productId === "string") {
     productId = productId.trim();
   }
-  const timestamp = await time.getTimestamp();
-  const response = {
-    headers: {
-      "content-type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
-    },
-    statusCode: 200,
-  };
+  //const timestamp = await time.getTimestamp();
 
-  if (!productId || productId.length === 0) {
+  if (productId === undefined || productId.length === 0) {
     log.error(`Error while trying to getProductsById - Product ID not defined`);
-    return merge(response, {
+    return merge(corsResponse, {
       statusCode: 400,
       body: JSON.stringify({
         ok: false,
         message: `You should provide the product ID '/products/{id}'`,
-        timestamp,
       }),
     });
   }
 
-  const product = products.find(p => p.id == productId);
+  const responseQuery = await query(
+    `SELECT id, title, description, price, count FROM products p INNER JOIN stocks s ON p.id = s.product_id WHERE p.id::text = '${productId}'`
+  );
+  if (!responseQuery.ok) {
+    log.error(`Error while trying to getProductsById - PostgresDB error`);
+    return merge(corsResponse, {
+      statusCode: 500,
+      body: JSON.stringify({ ok: true, message: responseQuery.message }),
+    });
+  }
+  const productList = responseQuery.rows;
+
+  const product = productList.find(p => p.id == productId);
   if (product === undefined) {
     log.info(`Product ID not found on getProductsById`);
-    return merge(response, {
+    return merge(corsResponse, {
       statusCode: 404,
       body: JSON.stringify({
         ok: false,
         message: `Product with ID ${productId} not found`,
-        timestamp,
       }),
     });
   }
 
   product.imageUrl = `https://source.unsplash.com/featured?nature,water&sig=${productId}`;
 
-  return merge(response, {
+  return merge(corsResponse, {
     statusCode: 200,
-    body: JSON.stringify({ ok: true, product, timestamp }),
+    body: JSON.stringify({ ok: true, product }),
   });
 
   // Use this code if you don't use the http event with the LAMBDA-PROXY integration

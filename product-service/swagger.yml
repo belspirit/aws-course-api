@@ -100,8 +100,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Product"
-        timestamp:
-          type: string
     ProductApiResponse:
       type: object
       properties:
@@ -110,8 +108,6 @@ components:
           default: true
         product:
           $ref: "#/components/schemas/Product"
-        timestamp:
-          type: string
     ProductApiBadResponse:
       type: object
       properties:
@@ -119,6 +115,4 @@ components:
           type: boolean
           default: false
         message:
-          type: string
-        timestamp:
           type: string

@@ -27,6 +27,13 @@ provider:
   stage: dev
   region: us-east-1
 
+  environment:
+    PG_HOST: lesson4.cavq3snlkdc4.us-east-1.rds.amazonaws.com
+    PG_PORT: 5432
+    PG_DATABASE: lesson4
+    PG_USERNAME: postgres
+    PG_PASSWORD: BAcGSe0msBpfTa6fBSWS
+
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
 #    - Effect: "Allow"
@@ -79,6 +86,13 @@ functions:
       - httpApi:
           path: /products/{id}
           method: get
+          cors: true
+  addProduct:
+    handler: addProduct/index.addProduct
+    events:
+      - httpApi:
+          path: /products
+          method: post
           cors: true
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
