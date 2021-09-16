@@ -1,6 +1,7 @@
 // webpack.config.js
 const slsw = require("serverless-webpack");
 const path = require("path");
+const webpack = require("webpack");
 
 // webpack.config.js
 module.exports = {
@@ -30,6 +31,7 @@ module.exports = {
       },
     ],
   },
+  plugins: [new webpack.IgnorePlugin({ resourceRegExp: /^pg-native$/ })],
   resolve: {
     extensions: [".js", ".json"],
     modules: ["node_modules", "bower_components", "shared", "/shared/vendor/modules"],

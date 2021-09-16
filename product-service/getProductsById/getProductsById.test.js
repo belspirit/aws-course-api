@@ -17,7 +17,6 @@ describe("Product Service: Testing getProductsById:", () => {
     const result = await getProductsById(event);
     expect(result).toHaveProperty("body");
     const body = JSON.parse(result.body);
-    console.log({ body });
     expect(body.ok).toBe(false);
     expect(body).toHaveProperty("message");
     expect(body.message).toContain("You should provide the product ID");
