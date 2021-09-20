@@ -1,6 +1,8 @@
 import time from "../time";
 import { getProductsList } from "./getProductsList";
-jest.mock("winston");
+
+jest.mock("../logger");
+jest.mock("../PostgresClient");
 jest.mock("../time");
 time.getTimestamp.mockImplementation(() => ({}));
 

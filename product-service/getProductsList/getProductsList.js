@@ -4,14 +4,14 @@ import util from "util";
 //import time from "../time";
 import { corsResponse } from "../corsResponse";
 import log from "../logger";
-import { query } from "../PostgresClient";
+import { PostgresClient } from "../PostgresClient";
 
 export const getProductsList = async event => {
   log.info(`getProductsList function is called with args: ${util.inspect(event)}`);
   //const timestamp = await time.getTimestamp();
-  const responseQuery = await query(
-    `SELECT id, title, description, price, count FROM products p INNER JOIN stocks s ON p.id = s.product_id`
-  );
+  const client = await PostgresClient.build();
+  const responseQuery = await client.fetchProductsList();
+  await client.close();
   if (!responseQuery.ok) {
     log.error(`Error while trying to getProductsList - PostgresDB error`);
     return merge(corsResponse, {
