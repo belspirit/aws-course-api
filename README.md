@@ -1,102 +1,70 @@
-**Task 4 Cloud Databases Overview and integration with Database
-Overview of DB solutions (SQL, No-SQL (Dynamodb, Mongo, Redis, Elastic Search), NewSQL)
-Infrastructure As Code (IaC), deployment sample to deploy RDS")**
+# Task 5 (AWS Simple Storage Service - S3)
 
-**TASK 4.1**
+**After Lecture 5 "Amazon Simple Storage Service (Amazon S3)"**
 
-Use AWS Console to create a database instance in RDS with PostgreSQL and default configuration. **(For T-Shape program SQL and NoSQL dbs might be used)**
-RDS instance configuration (Please have a look at Lecture Practical part)
-Connect to database instance via the tool DBeaver (https://dbeaver.io/download/) or similar tools like DataGrip/PgAdmin and create tables:
+## Prerequisites
 
-Product model:
+---
 
-```
-    products:
-    id -  uuid (primary key)
-    title - text, not null
-    description - text
-    price - integer
-```
+- The task is a continuation of Homework 4 and should be done in the same repos
+- **(for JS only)** Install the latest version of AWS SDK (https://aws.amazon.com/ru/sdk-for-node-js/)
+- **(for JS only)** Install the CSV parser package (https://www.npmjs.com/package/csv-parser)
+- Sign in into AWS Console and create a new S3 bucket with a folder, called uploaded
 
-Stock model:
+## TASK 5.1
 
-```
-    stocks:
-    product_id - uuid (foreign key from products.id)
-    count - integer (There are no more products than this count in stock)
-```
+---
 
-Write SQL script to fill tables with test examples. Store it in your GIT repository. Execute it for your DB to fill data.
+Create a new service, called **import-service**, with a its own **serverless.yml** file at the same level as product service.
 
-**TASK 4.2**
+The backend project structure should look like (in JS implementation):
 
-Extend your serverless.yml file with credentials to your database instance and pass it to lambda’s environment variables section.
-Integrate GET/products lambda to return a list of products from the database (joined stocks and products tables) Product instance on FE side should be joined model of product and stock by productId.
+- src/product-service
+- src/import-service
 
-Do not commit your environment variables in serverless.yml to github!
+Create a lambda function in that **serverless.yml** file, called **importProductsFile**, which will be triggered by the HTTP **GET** method.
 
-Recommended to use “pg” module to connect the database from the code https://www.npmjs.com/package/pg. (but not for NoSQL db)
+The requested URL should be **/import**.
 
-**Example:**
+The name of CSV file with products will be passed in a **query string** as a **name** parameter and should be described in the **serverless.yml** file as a **request parameter**.
 
-_BE: separate models in RDS_
+Update **serverless.yml** with policies to allow lambda functions to interact with **S3**.
 
-    Stock model example in DB:
+A new **Signed URL** should be created with the following **Key: `uploaded/${fileName}`**.
 
-    {
-      product_id: '19ba3d6a-f8ed-491b-a192-0a33b71b38c4',
-      count: 2
-    }
+The response from the lambda should be the created **Signed URL**.
 
+The lambda endpoint should be integrated with the frontend by updating **import** property of the API paths configuration.
 
-    Product model example in DB:
+## TASK 5.2
 
-    {
-      id: '19ba3d6a-f8ed-491b-a192-0a33b71b38c4'
-      title: 'Product Title',
-      description: 'This product ...',
-      price: 200
-    }
+---
 
-_FE: One product model as a result of BE models join(product and it's stock) _
+Create a lambda function under the same **serverless.yml** file, called **importFileParser**, which will be triggered by the S3 **s3:ObjectCreated:\*** event.
 
-      Product model example on Frontend side:
+Configure the event to be triggered only by changes in the **uploaded** folder in S3.
 
-      {
-        id: '19ba3d6a-f8ed-491b-a192-0a33b71b38c4',
-        count: 2
-        price: 200,
-        title: ‘Product Title’,
-        description: ‘This product ...’
-      }
+The lambda function should use the **Readable stream** to get an object from S3, parse it via **csv-parser** and log each record to be shown in **CloudWatch**.
 
-What does it mean for end user - user cannot buy more than product.count (no more items in stock) - But this is future functionality on FE side.
-Integrate GET/products/{productId} lambda to return a product from the database
+The response should be a correct HTTP response code.
 
-**TASK 4.3**
+## Evaluation criteria
 
-Implement POST/products lambda and implement its logic so it will be creating a new item in a products table.
-
-You should create a branch from the master and work in the branch (f.e. branch name - task-4) in BE (backend) and if needed in FE (frontend) repository
-
-Provide your reviewers with the link to the repo and URL (API Gateway URL) to execute the implemented lambda functions.
-
-**EVALUATION CRITERIA:**
+---
 
 Reviewers should verify the lambda functions by invoking them through provided URLs.
 
-- **1** - Task 4.1 is implemented
-- **3** - TASK 4.2 is implemented lambda links are provided and returns data
-- **4** - TASK 4.3 is implemented lambda links are provided and products is stored in DB (call TASK 4.2 to see the product)
-- **5** - Your own Frontend application is integrated with product service (/products API) and products from product-service are represented on Frontend. Link to a working Front-End application is provided for cross-check reviewer.
+- **1** - File **serverless.yml** contains configuration for **importProductsFile** function
+- **3** - The **importProductsFile** lambda function returns a correct response which can be used to upload a file into the **S3** bucket
+- **4** - Frontend application is integrated with **importProductsFile** lambda
+- **5** - The **importFileParser** lambda function is implemented and **serverless.yml** contains configuration for the lambda
 
-**Additional (optional) tasks (but nice to have):**
+## Additional (optional) tasks
 
-- **+1** **(All languages)** - POST/products lambda functions returns error 400 status code if product data is invalid
-- **+1** **(All languages)** - All lambdas return error 500 status code on any error (DB connection, any unhandled error in code)
-- **+1** **(All languages)** - All lambdas do console.log for each incoming requests and their arguments
-- **+1** **(All languages)** - Transaction based creation of product (in case stock creation is failed then related to this stock product is not created and not ready to be used by the end user and vice versa) (https://devcenter.kinvey.com/nodejs/tutorials/bl-transactional-support)
+---
 
-Link to product-service API: https://n4w7ktp7nk.execute-api.us-east-1.amazonaws.com/products
+- **+1** **(for JS only)** - **async/await** is used in lambda functions
+- **+1** **(All languages)** - **importProductsFile** lambda is covered by **unit** tests (**(for JS only)** **aws-sdk-mock** can be used to mock S3 methods - https://www.npmjs.com/package/aws-sdk-mock)
+- **+1** **(All languages)** - At the end of the **stream** the lambda function should move the file from the **uploaded** folder into the **parsed** folder (move the file means that file should be copied into **parsed** folder, and then deleted from **uploaded** folder)
 
 LInk to FE MR (YOUR OWN REPOSITORY): https://github.com/belspirit/shop-react-redux-cloudfront/pulls
