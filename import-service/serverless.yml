@@ -1,0 +1,36 @@
+service: rsschool-node-aws-s3-task5
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+        - "s3:*"
+      Resource:
+        - arn:aws:s3:::rsschool-node-aws-s3-task5
+        - arn:aws:s3:::rsschool-node-aws-s3-task5/*
+
+functions:
+  importProductsFile:
+    handler: importProductsFile/handler.importProductsFile
+    events:
+      - httpApi:
+          path: /import
+          method: get
+          request:
+            parameters:
+              querystrings:
+                name: ""
+          cors: true
+  importFileParser:
+    handler: importFileParser/handler.importFileParser
+    events:
+      - s3:
+          bucket: rsschool-node-aws-s3-task5
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+          existing: true
