@@ -20,10 +20,6 @@ describe("importProductsFile Lambda function test suit:", () => {
     jest.clearAllMocks();
   });
 
-  it("Lambda function is defined", () => {
-    expect(importProductsFile).toBeDefined();
-  });
-
   it("Should return error when name query parameter is not defined", async () => {
     let apiGatewayEventMock = lambdaEventMock.apiGateway().path("/import").build();
     const result = await importProductsFile(apiGatewayEventMock);

@@ -3,14 +3,19 @@ service: rsschool-node-aws-s3-task5
 provider:
   name: aws
   runtime: nodejs12.x
+  stage: dev
+  region: us-east-1
 
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "s3:ListBucket"
-        - "s3:*"
       Resource:
         - arn:aws:s3:::rsschool-node-aws-s3-task5
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource:
         - arn:aws:s3:::rsschool-node-aws-s3-task5/*
 
 functions:
@@ -23,7 +28,7 @@ functions:
           request:
             parameters:
               querystrings:
-                name: ""
+                name: true
           cors: true
   importFileParser:
     handler: importFileParser/handler.importFileParser

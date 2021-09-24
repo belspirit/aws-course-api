@@ -30,9 +30,15 @@ module.exports = {
       ContentType: "text/csv",
     };
 
-    let signedUrl = "";
     try {
-      signedUrl = await s3.getSignedUrlPromise("putObject", params);
+      const signedUrl = await s3.getSignedUrlPromise("putObject", params);
+      return merge(corsResponse, {
+        statusCode: 200,
+        body: JSON.stringify({
+          ok: true,
+          signedUrl,
+        }),
+      });
     } catch (error) {
       log.error(`Error while trying to getSignedUrl: ${util.inspect(error)}`);
       return merge(corsResponse, {
@@ -43,13 +49,5 @@ module.exports = {
         }),
       });
     }
-
-    return merge(corsResponse, {
-      statusCode: 200,
-      body: JSON.stringify({
-        ok: true,
-        signedUrl,
-      }),
-    });
   },
 };

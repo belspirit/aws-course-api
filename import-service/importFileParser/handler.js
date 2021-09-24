@@ -5,6 +5,9 @@ const log = require("../logger");
 const util = require("util");
 const path = require("path");
 
+const UPLOADED_FOLDER = "uploaded";
+const PARSED_FOLDER = "parsed";
+
 module.exports = {
   importFileParser: async function (event) {
     log.info(`importFileParser function is called with args: ${util.inspect(event)}`);
@@ -33,7 +36,7 @@ module.exports = {
               .copyObject({
                 Bucket: BUCKET,
                 CopySource: BUCKET + "/" + catalogPath,
-                Key: catalogPath.replace("uploaded", "parsed"),
+                Key: catalogPath.replace(UPLOADED_FOLDER, PARSED_FOLDER),
               })
               .promise();
             await s3.deleteObject({ Bucket: BUCKET, Key: catalogPath }).promise();

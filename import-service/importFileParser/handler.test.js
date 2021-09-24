@@ -29,10 +29,6 @@ describe("importFileParser Lambda function test suit:", () => {
     jest.clearAllMocks();
   });
 
-  it("Lambda function is defined", () => {
-    expect(importFileParser).toBeDefined();
-  });
-
   it("Function not logged any errors", async () => {
     await importFileParser(s3EventMock);
     expect(log.info).toBeCalled();
