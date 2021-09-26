@@ -5,7 +5,9 @@ const fs = require("fs");
 const log = require("../logger");
 jest.mock("../logger");
 
-let s3EventMock = lambdaEventMock
+process.env.SQS_URL = "TEST_URL";
+
+const s3EventMock = lambdaEventMock
   .s3()
   .object("uploaded/testName.csv")
   .bucket("test-bucket-uploaded")
@@ -16,12 +18,14 @@ const s3getObjectMock = jest
   .mockImplementation(() => fs.createReadStream("testFile.csv"));
 const s3copyObjectMock = jest.fn().mockImplementation(() => Promise.resolve());
 const s3deleteObjectMock = jest.fn().mockImplementation(() => Promise.resolve());
+const sqsSendMessageMock = jest.fn().mockImplementation((data, callback) => callback());
 
 describe("importFileParser Lambda function test suit:", () => {
   beforeEach(() => {
     AWSMock.mock("S3", "getObject", s3getObjectMock);
     AWSMock.mock("S3", "copyObject", s3copyObjectMock);
     AWSMock.mock("S3", "deleteObject", s3deleteObjectMock);
+    AWSMock.mock("SQS", "sendMessage", sqsSendMessageMock);
   });
 
   afterEach(() => {
