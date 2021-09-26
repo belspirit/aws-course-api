@@ -3,7 +3,7 @@ import merge from "lodash/merge";
 import util from "util";
 import { corsResponse } from "../corsResponse";
 import log from "../logger";
-import { query } from "../PostgresClient";
+import { PostgresClient } from "../PostgresClient";
 
 export const addProduct = async event => {
   log.info(`addProduct function is called with args: ${util.inspect(event)}`);
@@ -23,16 +23,16 @@ export const addProduct = async event => {
 
   let productId;
 
+  let client;
   try {
-    // start transaction
-    await query("BEGIN;");
+    client = await PostgresClient.build();
 
-    const responseQueryAddProduct = await query(
-      `INSERT INTO products (title, description, price) VALUES ('${title}', '${description}', ${price}) RETURNING id`
-    );
+    await client.beginTransaction();
+
+    const responseQueryAddProduct = await client.insertProduct(title, description, price);
     if (!responseQueryAddProduct.ok || responseQueryAddProduct.rowsAffected === 0) {
       // rollback transaction
-      await query("ROLLBACK;");
+      await client.rollbackTransaction();
       log.error(`Error while trying to add new product - PostgresDB error`);
       return merge(corsResponse, {
         statusCode: 500,
@@ -44,11 +44,9 @@ export const addProduct = async event => {
 
     productId = responseQueryAddProduct.rows[0].id;
 
-    const responseQueryAddStock = await query(
-      `INSERT INTO stocks (product_id, count) VALUES ('${productId}', ${count})`
-    );
+    const responseQueryAddStock = await client.insertStocks(productId, count);
     if (!responseQueryAddStock.ok || responseQueryAddStock.rowsAffected === 0) {
-      await query("ROLLBACK;");
+      await client.rollbackTransaction();
       log.error(`Error while trying to add new stock - PostgresDB error`);
       return merge(corsResponse, {
         statusCode: 500,
@@ -57,15 +55,15 @@ export const addProduct = async event => {
     }
   } catch (error) {
     log.error(`Error in addProduct call: ${util.inspect(error)}`);
-    await query("ROLLBACK;");
+    await client?.rollbackTransaction();
     return merge(corsResponse, {
       statusCode: 500,
       body: JSON.stringify({ ok: true, message: responseQueryAddStock.message }),
     });
   } finally {
-    // end transaction
-    await query("END;");
+    await client?.endTransaction();
   }
+  await client?.close();
 
   const imageUrl = `https://source.unsplash.com/featured?nature,water&sig=${productId}`;
 

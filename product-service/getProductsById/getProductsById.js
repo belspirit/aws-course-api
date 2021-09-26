@@ -4,7 +4,7 @@ import merge from "lodash/merge";
 import util from "util";
 import corsResponse from "../corsResponse";
 import log from "../logger";
-import { query } from "../PostgresClient";
+import { PostgresClient } from "../PostgresClient";
 
 export const getProductsById = async event => {
   log.info(`getProductsById function is called with args: ${util.inspect(event)}`);
@@ -25,14 +25,14 @@ export const getProductsById = async event => {
     });
   }
 
-  const responseQuery = await query(
-    `SELECT id, title, description, price, count FROM products p INNER JOIN stocks s ON p.id = s.product_id WHERE p.id::text = '${productId}'`
-  );
+  const client = await PostgresClient.build();
+  const responseQuery = await client.fetchProductsById(productId);
+  await client.close();
   if (!responseQuery.ok) {
     log.error(`Error while trying to getProductsById - PostgresDB error`);
     return merge(corsResponse, {
       statusCode: 500,
-      body: JSON.stringify({ ok: true, message: responseQuery.message }),
+      body: JSON.stringify({ ok: false, message: responseQuery.message }),
     });
   }
   const productList = responseQuery.rows;

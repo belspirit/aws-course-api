@@ -1,6 +1,8 @@
 import time from "../time";
 import { getProductsById } from "./getProductsById";
-jest.mock("winston");
+
+jest.mock("../logger");
+jest.mock("../PostgresClient");
 jest.mock("../time");
 time.getTimestamp.mockImplementation(() => ({}));
 
@@ -35,7 +37,7 @@ describe("Product Service: Testing getProductsById:", () => {
     expect(body.message).toContain("You should provide the product ID");
   });
 
-  it("Should return error message when Id is not defined", async () => {
+  it("Should return error message when product with Id not found", async () => {
     const productId = "WRONG ID";
     const event = {
       pathParameters: { id: productId },
