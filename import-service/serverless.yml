@@ -47,10 +47,19 @@ resources:
     SNSSubscription:
       Type: AWS::SNS::Subscription
       Properties:
+        Endpoint: creo_man@mail.ru
+        Protocol: email
+        TopicArn:
+          Ref: createProductTopic
+    SNSSubscriptionExpensive:
+      Type: AWS::SNS::Subscription
+      Properties:
         Endpoint: sergey.labetik@gmail.com
         Protocol: email
         TopicArn:
           Ref: createProductTopic
+        FilterPolicy:
+          { "event": ["product_created"], "price_usd": [{ "numeric": [">=", 3000] }] }
 
 functions:
   catalogBatchProcess:

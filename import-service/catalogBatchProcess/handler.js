@@ -40,6 +40,16 @@ module.exports = {
           .publish({
             Message: `Product was created: ${JSON.stringify(product)}`,
             TopicArn: process.env.SNS_TOPIC_NAME,
+            MessageAttributes: {
+              event: {
+                Type: "String",
+                Value: "product_created",
+              },
+              price_usd: {
+                Type: "Number",
+                Value: product.price,
+              },
+            },
           })
           .promise();
       } catch (error) {
