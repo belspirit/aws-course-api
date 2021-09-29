@@ -42,12 +42,12 @@ module.exports = {
             TopicArn: process.env.SNS_TOPIC_NAME,
             MessageAttributes: {
               event: {
-                Type: "String",
-                Value: "product_created",
+                DataType: "String",
+                StringValue: "product_created",
               },
               price_usd: {
-                Type: "Number",
-                Value: product.price,
+                DataType: "Number",
+                StringValue: String(product.price),
               },
             },
           })
