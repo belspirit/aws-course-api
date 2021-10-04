@@ -8,6 +8,8 @@ provider:
 
   environment:
     SQS_URL:
+      Fn::ImportValue: product-service-dev-catalogItemsQueueUrl
+    SQS_ARN:
       Fn::ImportValue: product-service-dev-catalogItemsQueueArn
 
   iamRoleStatements:
