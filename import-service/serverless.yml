@@ -1,4 +1,4 @@
-service: rsschool-node-aws-s3-task5
+service: import-service
 
 provider:
   name: aws
@@ -8,69 +8,21 @@ provider:
 
   environment:
     SQS_URL:
-      Ref: catalogItemsQueue
-    SNS_TOPIC_NAME:
-      Ref: createProductTopic
+      Fn::ImportValue: product-service-dev-catalogItemsQueueArn
 
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "s3:ListBucket"
       Resource:
-        - arn:aws:s3:::rsschool-node-aws-s3-task5
+        - arn:aws:s3:::import-service-labetik-s3
     - Effect: "Allow"
       Action:
         - "s3:*"
       Resource:
-        - arn:aws:s3:::rsschool-node-aws-s3-task5/*
-    - Effect: "Allow"
-      Action:
-        - "sqs:*"
-      Resource:
-        - Fn::GetAtt: [catalogItemsQueue, Arn]
-    - Effect: "Allow"
-      Action:
-        - "sns:*"
-      Resource:
-        Ref: createProductTopic
-
-resources:
-  Resources:
-    catalogItemsQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: rsschool-node-aws-sqs-sns-queue
-    createProductTopic:
-      Type: AWS::SNS::Topic
-      Properties:
-        TopicName: rsschool-node-aws-sqs-sns-topic
-    SNSSubscription:
-      Type: AWS::SNS::Subscription
-      Properties:
-        Endpoint: creo_man@mail.ru
-        Protocol: email
-        TopicArn:
-          Ref: createProductTopic
-    SNSSubscriptionExpensive:
-      Type: AWS::SNS::Subscription
-      Properties:
-        Endpoint: sergey.labetik@gmail.com
-        Protocol: email
-        TopicArn:
-          Ref: createProductTopic
-        FilterPolicy:
-          { "event": ["product_created"], "price_usd": [{ "numeric": [">=", 3000] }] }
+        - arn:aws:s3:::import-service-labetik-s3/*
 
 functions:
-  catalogBatchProcess:
-    handler: catalogBatchProcess/handler.catalogBatchProcess
-    events:
-      - sqs:
-          batchSize: 5
-          arn:
-            Fn::GetAtt:
-              - catalogItemsQueue
-              - Arn
   importProductsFile:
     handler: importProductsFile/handler.importProductsFile
     events:
@@ -86,7 +38,7 @@ functions:
     handler: importFileParser/handler.importFileParser
     events:
       - s3:
-          bucket: rsschool-node-aws-s3-task5
+          bucket: import-service-labetik-s3
           event: s3:ObjectCreated:*
           rules:
             - prefix: uploaded/

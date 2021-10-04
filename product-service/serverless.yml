@@ -33,6 +33,20 @@ provider:
     PG_DATABASE: lesson4
     PG_USERNAME: postgres
     PG_PASSWORD: BAcGSe0msBpfTa6fBSWS
+    SNS_TOPIC_NAME:
+      Ref: createProductTopic
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource:
+        - Fn::GetAtt: [catalogItemsQueue, Arn]
+    - Effect: "Allow"
+      Action:
+        - "sns:*"
+      Resource:
+        Ref: createProductTopic
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -71,8 +85,16 @@ custom:
     includeModules: false # Node modules configuration for packaging
     packager: "npm" # Packager that will be used to package your external modules
     excludeFiles: "**/*.test.js" # Provide a glob for files to ignore
+  exportName: ${self:service}-${self:provider.stage}
 
 functions:
+  catalogBatchProcess:
+    handler: catalogBatchProcess/index.catalogBatchProcess
+    events:
+      - sqs:
+          batchSize: 5
+          arn:
+            Fn::GetAtt: [catalogItemsQueue, Arn]
   getProductsList:
     handler: getProductsList/index.getProductsList
     events:
@@ -134,14 +156,38 @@ functions:
 #    environment:
 #      variable2: value2
 
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+resources:
+  Resources:
+    catalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: rsschool-node-aws-sqs-sns-queue
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: rsschool-node-aws-sqs-sns-topic
+    SNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: creo_man@mail.ru
+        Protocol: email
+        TopicArn:
+          Ref: createProductTopic
+    SNSSubscriptionExpensive:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: sergey.labetik@gmail.com
+        Protocol: email
+        TopicArn:
+          Ref: createProductTopic
+        FilterPolicy:
+          { "event": ["product_created"], "price_usd": [{ "numeric": [">=", 3000] }] }
+  Outputs:
+    catalogItemsQueueArn:
+      Description: "Catalog Queue Arn value"
+      Value:
+        Fn::GetAtt:
+          - catalogItemsQueue
+          - Arn
+      Export:
+        Name: ${self:custom.exportName}-catalogItemsQueueArn

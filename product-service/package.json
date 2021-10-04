@@ -7,7 +7,7 @@
     "build": "sls package",
     "deploy": "sls deploy",
     "invoke-local": "serverless invoke local --function getProductsList",
-    "test": "jest"
+    "test": "jest --watch"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +16,8 @@
     "axios": "^0.21.1",
     "lodash": "^4.17.21",
     "pg": "^8.7.1",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "yup": "^0.32.9"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.15.0",
@@ -25,11 +26,13 @@
     "@types/jest": "^27.0.1",
     "@types/node": "^16.7.5",
     "@types/winston": "^2.4.4",
+    "aws-sdk-mock": "^5.4.0",
     "babel": "^6.23.0",
     "babel-jest": "^27.1.0",
     "babel-loader": "^8.2.2",
     "babel-runtime": "^6.26.0",
     "jest": "^27.1.0",
+    "lambda-event-mock": "^1.5.0",
     "prettier": "^2.4.0",
     "serverless": "^2.56.0",
     "serverless-webpack": "^5.5.2"
