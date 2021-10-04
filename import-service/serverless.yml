@@ -23,6 +23,11 @@ provider:
         - "s3:*"
       Resource:
         - arn:aws:s3:::import-service-labetik-s3/*
+    - Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource:
+        - Fn::ImportValue: product-service-dev-catalogItemsQueueArn
 
 functions:
   importProductsFile:
