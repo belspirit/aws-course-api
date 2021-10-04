@@ -191,3 +191,9 @@ resources:
           - Arn
       Export:
         Name: ${self:custom.exportName}-catalogItemsQueueArn
+    catalogItemsQueueUrl:
+      Description: "Catalog Queue Url value"
+      Value:
+        Ref: catalogItemsQueue
+      Export:
+        Name: ${self:custom.exportName}-catalogItemsQueueUrl

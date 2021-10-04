@@ -1,5 +1,5 @@
 const AWS = require("aws-sdk");
-const BUCKET = "rsschool-node-aws-s3-task5";
+const BUCKET = "import-service-labetik-s3";
 const log = require("../logger");
 const util = require("util");
 const merge = require("lodash/merge");
