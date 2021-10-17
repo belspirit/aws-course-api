@@ -1,70 +1,53 @@
-# Task 5 (AWS Simple Storage Service - S3)
+# Task 6 (AWS SQS/SNS)
 
-**After Lecture 5 "Amazon Simple Storage Service (Amazon S3)"**
+**After Lecture 6 "Lecture 6: SNS subscription to file upload + Using Lambdas with SQS and SNS"**
 
 ## Prerequisites
 
 ---
 
-- The task is a continuation of Homework 4 and should be done in the same repos
-- **(for JS only)** Install the latest version of AWS SDK (https://aws.amazon.com/ru/sdk-for-node-js/)
-- **(for JS only)** Install the CSV parser package (https://www.npmjs.com/package/csv-parser)
-- Sign in into AWS Console and create a new S3 bucket with a folder, called uploaded
+- The task is a continuation of S3 bucket integration and should be done in the same repos
+- Task goal is to create to create service to be able to save products which were provided in csv file in database.
 
-## TASK 5.1
+## TASK 6.1
 
 ---
 
-Create a new service, called **import-service**, with a its own **serverless.yml** file at the same level as product service.
+Create a lambda function called **catalogBatchProcess** in the resources section in **serverless.yml**.
 
-The backend project structure should look like (in JS implementation):
-
-- src/product-service
-- src/import-service
-
-Create a lambda function in that **serverless.yml** file, called **importProductsFile**, which will be triggered by the HTTP **GET** method.
-
-The requested URL should be **/import**.
-
-The name of CSV file with products will be passed in a **query string** as a **name** parameter and should be described in the **serverless.yml** file as a **request parameter**.
-
-Update **serverless.yml** with policies to allow lambda functions to interact with **S3**.
-
-A new **Signed URL** should be created with the following **Key: `uploaded/${fileName}`**.
-
-The response from the lambda should be the created **Signed URL**.
-
-The lambda endpoint should be integrated with the frontend by updating **import** property of the API paths configuration.
-
-## TASK 5.2
+## TASK 6.2
 
 ---
 
-Create a lambda function under the same **serverless.yml** file, called **importFileParser**, which will be triggered by the S3 **s3:ObjectCreated:\*** event.
+Create a SQS queue, called **catalogItemsQueue**, in the resources section in **serverless.yml** file.
+Configure the SQS to trigger lambda **catalogBatchProcess** with 5 messages at once via batchSize property.
+The lambda function should iterate over all SQS messages and create corresponding products in the products table.
 
-Configure the event to be triggered only by changes in the **uploaded** folder in S3.
+Update the **importFileParser** lambda function (**TASK 5**) to send each CSV record into SQS.
 
-The lambda function should use the **Readable stream** to get an object from S3, parse it via **csv-parser** and log each record to be shown in **CloudWatch**.
+## TASK 6.3
 
-The response should be a correct HTTP response code.
+---
+
+Create an SNS topic **createProductTopic** and email subscription in the resources section in **serverless.yml**.
+Update the **catalogBatchProcess** lambda function to send an email once it creates products.
 
 ## Evaluation criteria
 
 ---
 
-Reviewers should verify the lambda functions by invoking them through provided URLs.
+Reviewers should verify the lambda functions, SQS and SNS topic and subscription in PR.
 
-- **1** - File **serverless.yml** contains configuration for **importProductsFile** function
-- **3** - The **importProductsFile** lambda function returns a correct response which can be used to upload a file into the **S3** bucket
-- **4** - Frontend application is integrated with **importProductsFile** lambda
-- **5** - The **importFileParser** lambda function is implemented and **serverless.yml** contains configuration for the lambda
+- **1** - File **serverless.yml** contains configuration for **catalogBatchProcess** function
+- **2** - File **serverless.yml** contains policies to allow lambda **catalogBatchProcess** function to interact with SNS and SQS
+- **3** - File **serverless.yml** contains configuration for SQS **catalogItemsQueue**
+- **4** - File **serverless.yml** contains configuration for SNS Topic **createProductTopic** and email subscription
 
 ## Additional (optional) tasks
 
 ---
 
-- **+1** **(for JS only)** - **async/await** is used in lambda functions
-- **+1** **(All languages)** - **importProductsFile** lambda is covered by **unit** tests (**(for JS only)** **aws-sdk-mock** can be used to mock S3 methods - https://www.npmjs.com/package/aws-sdk-mock)
-- **+1** **(All languages)** - At the end of the **stream** the lambda function should move the file from the **uploaded** folder into the **parsed** folder (move the file means that file should be copied into **parsed** folder, and then deleted from **uploaded** folder)
+- **+1** **(All languages)** - **catalogBatchProcess** lambda is covered by **unit** tests
+- **+1** **(All languages)** - set a Filter Policy for SNS **createProductTopic** in **serverless.yml** (Create an additional email subscription and distribute messages to different emails depending on the filter for any product attribute)
 
 LInk to FE MR (YOUR OWN REPOSITORY): https://github.com/belspirit/shop-react-redux-cloudfront/pulls

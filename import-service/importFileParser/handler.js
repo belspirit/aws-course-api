@@ -1,5 +1,5 @@
 const AWS = require("aws-sdk");
-const BUCKET = "rsschool-node-aws-s3-task5";
+const BUCKET = "import-service-labetik-s3";
 const csvParser = require("csv-parser");
 const log = require("../logger");
 const util = require("util");
@@ -21,11 +21,27 @@ module.exports = {
         Key: catalogPath,
       };
       const s3Stream = s3.getObject(params).createReadStream();
+      const sqs = new AWS.SQS();
       await new Promise((resolve, reject) => {
         s3Stream
           .pipe(csvParser())
-          .on("data", data => {
+          .on("data", async data => {
             log.info(util.inspect(data));
+            await new Promise((resolve, reject) => {
+              sqs.sendMessage(
+                { QueueUrl: process.env.SQS_URL, MessageBody: JSON.stringify(data) },
+                (error, data) => {
+                  if (error) {
+                    log.error(
+                      `Error while trying to send message: ${util.inspect(error)}`
+                    );
+                    reject();
+                  }
+                  log.info(`Send message for: ${util.inspect(data)}`);
+                  resolve();
+                }
+              );
+            });
           })
           .on("error", error => {
             log.error(util.inspect(error));

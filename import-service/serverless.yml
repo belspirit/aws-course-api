@@ -1,4 +1,4 @@
-service: rsschool-node-aws-s3-task5
+service: import-service
 
 provider:
   name: aws
@@ -6,17 +6,28 @@ provider:
   stage: dev
   region: us-east-1
 
+  environment:
+    SQS_URL:
+      Fn::ImportValue: product-service-dev-catalogItemsQueueUrl
+    SQS_ARN:
+      Fn::ImportValue: product-service-dev-catalogItemsQueueArn
+
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "s3:ListBucket"
       Resource:
-        - arn:aws:s3:::rsschool-node-aws-s3-task5
+        - arn:aws:s3:::import-service-labetik-s3
     - Effect: "Allow"
       Action:
         - "s3:*"
       Resource:
-        - arn:aws:s3:::rsschool-node-aws-s3-task5/*
+        - arn:aws:s3:::import-service-labetik-s3/*
+    - Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource:
+        - Fn::ImportValue: product-service-dev-catalogItemsQueueArn
 
 functions:
   importProductsFile:
@@ -34,7 +45,7 @@ functions:
     handler: importFileParser/handler.importFileParser
     events:
       - s3:
-          bucket: rsschool-node-aws-s3-task5
+          bucket: import-service-labetik-s3
           event: s3:ObjectCreated:*
           rules:
             - prefix: uploaded/
