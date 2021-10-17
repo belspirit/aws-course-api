@@ -1,53 +1,80 @@
-# Task 6 (AWS SQS/SNS)
-
-**After Lecture 6 "Lecture 6: SNS subscription to file upload + Using Lambdas with SQS and SNS"**
+# Task 7 (Lambda Authorizer + Cognito Authorization)
 
 ## Prerequisites
 
 ---
 
-- The task is a continuation of S3 bucket integration and should be done in the same repos
-- Task goal is to create to create service to be able to save products which were provided in csv file in database.
+- The task is a continuation of **Homework 6** and should be done in the same repo.
 
-## TASK 6.1
-
----
-
-Create a lambda function called **catalogBatchProcess** in the resources section in **serverless.yml**.
-
-## TASK 6.2
+## TASK 7.1
 
 ---
 
-Create a SQS queue, called **catalogItemsQueue**, in the resources section in **serverless.yml** file.
-Configure the SQS to trigger lambda **catalogBatchProcess** with 5 messages at once via batchSize property.
-The lambda function should iterate over all SQS messages and create corresponding products in the products table.
+Create a new service, called **authorization-service**, with its own **serverless.yml** file at the same level as product and import services.
 
-Update the **importFileParser** lambda function (**TASK 5**) to send each CSV record into SQS.
+The backend project structure should look like:
 
-## TASK 6.3
+- backend-repository/product-service
+- backend-repository/import-service
+- backend-repository/authorization-service
 
----
+Create **basicAuthorizer** lambda function in authorization service in **serverless.yml** file. This lambda should have at least one environment variable with credentials: {yours_github_account_login}=TEST_PASSWORD
 
-Create an SNS topic **createProductTopic** and email subscription in the resources section in **serverless.yml**.
-Update the **catalogBatchProcess** lambda function to send an email once it creates products.
+- {yours_github_account_login} - your GitHub account name. Login for test user should be your GitHub account name (example: vasiapupkin)
+- TEST_PASSWORD - password string. Password for test user must be «TEST_PASSWORD»
 
-## Evaluation criteria
+**basicAuthorizer** lambda should take **Basic authorization_token**, decode it and check that credentials provided by token exist in the lambda environment variable. This lambda should return 403 HTTP status if access is denied for this user (invalid **authorization_token**) and 401 HTTP status if Authorization header is not provided.
 
----
+**NOTE:** do not send credentials to the GitHub. Use **.env** file and **serverless-dotenv-plugin** serverless plugin to add environment variables to the lambda. Add **.env** file to **.gitignore** file.
 
-Reviewers should verify the lambda functions, SQS and SNS topic and subscription in PR.
+.env file example:
+vasiapupkin=TEST_PASSWORD
 
-- **1** - File **serverless.yml** contains configuration for **catalogBatchProcess** function
-- **2** - File **serverless.yml** contains policies to allow lambda **catalogBatchProcess** function to interact with SNS and SQS
-- **3** - File **serverless.yml** contains configuration for SQS **catalogItemsQueue**
-- **4** - File **serverless.yml** contains configuration for SNS Topic **createProductTopic** and email subscription
-
-## Additional (optional) tasks
+## TASK 7.2
 
 ---
 
-- **+1** **(All languages)** - **catalogBatchProcess** lambda is covered by **unit** tests
-- **+1** **(All languages)** - set a Filter Policy for SNS **createProductTopic** in **serverless.yml** (Create an additional email subscription and distribute messages to different emails depending on the filter for any product attribute)
+Add Lambda authorization (**basicAuthorizer** lambda) to the **/import** path of the **import-service** API Gateway.
+
+## TASK 7.3
+
+---
+
+Request from the client application to the **/import** path of the **import-service** should have Basic Authorization header:
+Authorization: Basic **authorization_token**
+where **authorization_token** is equal base64-encoded({yours_github_account_login}:TEST_PASSWORD)
+(For example, Authorization: Basic sGLzdRxvZmw0ZXs0UGFzcw==)
+Client should get **authorization_token** value from browser localStorage
+
+## Evaluation criteria (each mark includes previous mark criteria)
+
+---
+
+Provide your reviewers with the link to the repo, client application and URLs to execute the **/import** path of the **import-service**
+
+- **1** - **authorization-service** is added to the repo, has correct **basicAuthorizer** lambda and correct **serverless.yaml** file
+- **3** - **import-service** serverless.yaml file has authorizer configuration for the **importProductsFile** lambda. Request to the **importProductsFile** lambda should work only with correct **authorization_token** being decoded and checked by **basicAuthorizer** lambda. Response should be in 403 HTTP status if access is denied for this user (invalid **authorization_token**) and in 401 HTTP status if Authorization header is not provided.
+- **5** - update client application to send Authorization: Basic **authorization_token** header on import. Client should get **authorization_token** value from browser localStorage https://developer.mozilla.org/ru/docs/Web/API/Window/localStorage
+  **authorization_token** = localStorage.getItem('**authorization_token**')
+
+## Additional (optional) tasks - recommended for personal growth and further interviews, but this part would not be evauated on cross-check
+
+---
+
+- **+1** - Client application should display alerts for the responses in 401 and 403 HTTP statuses. This behavior should be added to the **nodejs-aws-fe-main/src/index.tsx** file
+- **just practice, no evaluation** - Add Login page and protect **getProducts** lambda by the Cognito Authorizer
+  - Create Cognito User Pool using a demo from the lecture. Leave **email** in a list of standard required attributes. Checkbox **Allow users to sign themselves up** should be checked. Also, set **email** as an attribute that you want to verify.
+  - Add **App Client** to the User Pool
+  - In the **App client settings** section select all **Identity Providers**. Fill the **Callback URL(s)** field with your Client Application URL (f.e. http://localhost:3000/). Allow only **Implicit grant** OAuth Flow. Allow all **OAuth Scopes**
+  - Create Domain name
+  - After all of these manipulations, you can open your **login page** by clicking on the **Launch Hosted UI** link in the **App client settings**
+  - Provide this link to your reviewers. The reviewer can just confirm that everything works for him too.
+  - Add Cognito authorizer to the **getProducts** lambda. Use **Authorization** as a **Token Source**
+  - How to make sure that everything works as expected:
+    - Open login page and **Sign up** a new user. Use a real email address to create this user
+    - Verify user using code from the email
+    - After verification and after every login you will be redirected to the Client application. URL should contain **id_token** which can be used to access the **getProducts** lambda
+    - Call **getProducts** lambda using **id_token** as a value for the **Authorization** header
+  - Remove authorization from the **getProducts** after your task will be checked
 
 LInk to FE MR (YOUR OWN REPOSITORY): https://github.com/belspirit/shop-react-redux-cloudfront/pulls
