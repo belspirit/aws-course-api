@@ -1,4 +1,5 @@
 const util = require("util");
+const log = require("../logger");
 
 const generatePolicy = (principalId, resource, effect = "Allow") => ({
   principalId,

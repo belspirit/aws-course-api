@@ -15,15 +15,6 @@ custom:
 functions:
   basicAuthorizer:
     handler: basicAuthorizer/handler.basicAuthorizer
-    events:
-      - httpApi:
-          path: /import
-          method: get
-          request:
-            parameters:
-              querystrings:
-                name: true
-          cors: true
 
 resources:
   Outputs:
@@ -31,7 +22,7 @@ resources:
       Description: "Basic Authorizer Lambda Arn value"
       Value:
         Fn::GetAtt:
-          - basicAuthorizer
+          - BasicAuthorizerLambdaFunction
           - Arn
       Export:
         Name: ${self:custom.exportName}-basicAuthorizerArn
