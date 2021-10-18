@@ -41,6 +41,13 @@ functions:
               querystrings:
                 name: true
           cors: true
+          authorizer:
+            name: basicAuthorizer
+            arn:
+              - Fn::ImportValue: authorization-service-dev-basicAuthorizerArn
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
+            type: token
   importFileParser:
     handler: importFileParser/handler.importFileParser
     events:

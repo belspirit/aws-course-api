@@ -9,6 +9,9 @@ provider:
   stage: dev
   region: us-east-1
 
+custom:
+  exportName: ${self:service}-${self:provider.stage}
+
 functions:
   basicAuthorizer:
     handler: basicAuthorizer/handler.basicAuthorizer
@@ -21,3 +24,14 @@ functions:
               querystrings:
                 name: true
           cors: true
+
+resources:
+  Outputs:
+    basicAuthorizerArn:
+      Description: "Basic Authorizer Lambda Arn value"
+      Value:
+        Fn::GetAtt:
+          - basicAuthorizer
+          - Arn
+      Export:
+        Name: ${self:custom.exportName}-basicAuthorizerArn
