@@ -33,7 +33,7 @@ functions:
   importProductsFile:
     handler: importProductsFile/handler.importProductsFile
     events:
-      - httpApi:
+      - http:
           path: /import
           method: get
           request:
@@ -44,10 +44,10 @@ functions:
           authorizer:
             name: basicAuthorizer
             arn:
-              - Fn::ImportValue: authorization-service-dev-basicAuthorizerArn
+              Fn::ImportValue: authorization-service-dev-basicAuthorizerArn
+            type: token
             resultTtlInSeconds: 0
             identitySource: method.request.header.Authorization
-            type: token
   importFileParser:
     handler: importFileParser/handler.importFileParser
     events:
@@ -57,3 +57,24 @@ functions:
           rules:
             - prefix: uploaded/
           existing: true
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
+    GatewayResponseDefault5XX:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
