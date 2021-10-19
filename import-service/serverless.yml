@@ -60,21 +60,21 @@ functions:
 
 resources:
   Resources:
-    GatewayResponseDefault4XX:
+    GatewayResponseDenied:
       Type: "AWS::ApiGateway::GatewayResponse"
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-        ResponseType: DEFAULT_4XX
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: ACCESS_DENIED
         RestApiId:
           Ref: "ApiGatewayRestApi"
-    GatewayResponseDefault5XX:
+    GatewayResponseUnauthorized:
       Type: "AWS::ApiGateway::GatewayResponse"
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-        ResponseType: DEFAULT_5XX
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: UNAUTHORIZED
         RestApiId:
           Ref: "ApiGatewayRestApi"
