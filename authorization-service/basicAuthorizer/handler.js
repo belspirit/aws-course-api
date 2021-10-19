@@ -18,6 +18,7 @@ module.exports = {
     log.info(`basicAuthorizer function is called with args: ${util.inspect(event)}`);
 
     if (event["type"] !== "TOKEN") {
+      log.info(`User unauthorized`);
       return "Unauthorized";
     }
 
@@ -31,14 +32,19 @@ module.exports = {
       const username = plainCreds[0];
       const password = plainCreds[1];
 
-      log.info(`username: ${username} and password: ${password}`);
+      log.info(`username: '${username}' and password: '${password}'`);
 
       const storedUserPassword = process.env[username];
-      const effect = storedUserPassword != password ? "Deny" : "Allow";
+      log.info(`storedUserPassword: ${storedUserPassword}`);
+      const effect =
+        !storedUserPassword || storedUserPassword != password ? "Deny" : "Allow";
+      log.info(`Access: ${effect}`);
 
       const policy = generatePolicy(encodedCreds, event.methodArn, effect);
+      log.info(`Policy: ${JSON.stringify(policy)}`);
       return policy;
     } catch (error) {
+      log.info(`User unauthorized`);
       return `Unauthorized: ${error.message}`;
     }
   },
