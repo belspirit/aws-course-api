@@ -1,0 +1,28 @@
+service: authorization-service
+
+plugins:
+  - serverless-dotenv-plugin
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-east-1
+
+custom:
+  exportName: ${self:service}-${self:provider.stage}
+
+functions:
+  basicAuthorizer:
+    handler: basicAuthorizer/handler.basicAuthorizer
+
+resources:
+  Outputs:
+    basicAuthorizerArn:
+      Description: "Basic Authorizer Lambda Arn value"
+      Value:
+        Fn::GetAtt:
+          - BasicAuthorizerLambdaFunction
+          - Arn
+      Export:
+        Name: ${self:custom.exportName}-basicAuthorizerArn

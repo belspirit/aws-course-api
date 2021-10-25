@@ -1,0 +1,20 @@
+{
+  "name": "authorization-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "sls package",
+    "deploy": "serverless deploy --stage dev",
+    "test": "jest --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "serverless-dotenv-plugin": "^3.10.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.2",
+    "jest": "^27.3.0"
+  }
+}

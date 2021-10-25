@@ -33,7 +33,7 @@ functions:
   importProductsFile:
     handler: importProductsFile/handler.importProductsFile
     events:
-      - httpApi:
+      - http:
           path: /import
           method: get
           request:
@@ -41,6 +41,13 @@ functions:
               querystrings:
                 name: true
           cors: true
+          authorizer:
+            name: basicAuthorizer
+            arn:
+              Fn::ImportValue: authorization-service-dev-basicAuthorizerArn
+            type: token
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
   importFileParser:
     handler: importFileParser/handler.importFileParser
     events:
@@ -50,3 +57,24 @@ functions:
           rules:
             - prefix: uploaded/
           existing: true
+
+resources:
+  Resources:
+    GatewayResponseDenied:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: ACCESS_DENIED
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
+    GatewayResponseUnauthorized:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: UNAUTHORIZED
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
