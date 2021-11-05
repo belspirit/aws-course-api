@@ -1,80 +1,69 @@
-# Task 7 (Lambda Authorizer + Cognito Authorization)
+# Task 9 (Backend For Frontend)
+
+Score: 7/7
 
 ## Prerequisites
-
 ---
 
-- The task is a continuation of **Homework 6** and should be done in the same repo.
+- The task is a continuation of **Homework 8**
+- The task should be done in the backend repo - the same repo with **product-service** and **import-service** services
+- **product-service** and **CART** services should exist and work in your application
 
-## TASK 7.1
+## TASK 9.1
+---
+ 
+Create a folder for the **bff-service** in the same level as for other services in the repo. Create an **express** application in this folder, that listens for all requests and redirects those requests to the appropriate services based on variables provided by the **.env** file.
 
+**bff-service** workflow example:
+* Call **bff-service** by the URL: **{bff-service-url}**/**{recipient-service-name}**?var1=someValue
+  * **{bff-service-url}** - for example, http://localhost:3000
+  * **{recipient-service-name}** - ‘cart’ or ‘product’ (you can use any other mapping of your choice)
+  * ?var1=someValue - query string
+* Get **recipientURL** from the env variables using **{recipient-service-name}** as a key
+* Get request **method** (GET, POST, etc.)
+* Make a new request to the needed service using the appropriate **method** and **recipientURL**
+* **bff-service** should return the result of the recipient’s request
+
+If **bff-service** cannot find **recipientURL** by the **{recipient-service-name}**, return a 'Cannot process request’ error message with status 502.  
+**bff-service** should return the same status code and error message that the recipient service returns to the **bff-service** in case of any error on the recipient service side.  
+
+## TASK 9.2
 ---
 
-Create a new service, called **authorization-service**, with its own **serverless.yml** file at the same level as product and import services.
+Deploy **bff-service** with Elastic Beanstalk. 
+* Platform should be **node.js**
+* Application name must follow the following convention **{yours_github_account_login}-bff-api**
+* Use the **--cname** option **{yours_github_account_login}-bff-api-{environment_name}**
+* Use the **--single** option
 
-The backend project structure should look like:
-
-- backend-repository/product-service
-- backend-repository/import-service
-- backend-repository/authorization-service
-
-Create **basicAuthorizer** lambda function in authorization service in **serverless.yml** file. This lambda should have at least one environment variable with credentials: {yours_github_account_login}=TEST_PASSWORD
-
-- {yours_github_account_login} - your GitHub account name. Login for test user should be your GitHub account name (example: vasiapupkin)
-- TEST_PASSWORD - password string. Password for test user must be «TEST_PASSWORD»
-
-**basicAuthorizer** lambda should take **Basic authorization_token**, decode it and check that credentials provided by token exist in the lambda environment variable. This lambda should return 403 HTTP status if access is denied for this user (invalid **authorization_token**) and 401 HTTP status if Authorization header is not provided.
-
-**NOTE:** do not send credentials to the GitHub. Use **.env** file and **serverless-dotenv-plugin** serverless plugin to add environment variables to the lambda. Add **.env** file to **.gitignore** file.
-
-.env file example:
-vasiapupkin=TEST_PASSWORD
-
-## TASK 7.2
-
----
-
-Add Lambda authorization (**basicAuthorizer** lambda) to the **/import** path of the **import-service** API Gateway.
-
-## TASK 7.3
-
----
-
-Request from the client application to the **/import** path of the **import-service** should have Basic Authorization header:
-Authorization: Basic **authorization_token**
-where **authorization_token** is equal base64-encoded({yours_github_account_login}:TEST_PASSWORD)
-(For example, Authorization: Basic sGLzdRxvZmw0ZXs0UGFzcw==)
-Client should get **authorization_token** value from browser localStorage
+**bff-service** should work only with requests from the **product-service** and **CART** services.  
+All **product-service** and **CART** services methods should work correctly if requested via **bff-service**
 
 ## Evaluation criteria (each mark includes previous mark criteria)
-
 ---
 
-Provide your reviewers with the link to the repo, client application and URLs to execute the **/import** path of the **import-service**
-
-- **1** - **authorization-service** is added to the repo, has correct **basicAuthorizer** lambda and correct **serverless.yaml** file
-- **3** - **import-service** serverless.yaml file has authorizer configuration for the **importProductsFile** lambda. Request to the **importProductsFile** lambda should work only with correct **authorization_token** being decoded and checked by **basicAuthorizer** lambda. Response should be in 403 HTTP status if access is denied for this user (invalid **authorization_token**) and in 401 HTTP status if Authorization header is not provided.
-- **5** - update client application to send Authorization: Basic **authorization_token** header on import. Client should get **authorization_token** value from browser localStorage https://developer.mozilla.org/ru/docs/Web/API/Window/localStorage
-  **authorization_token** = localStorage.getItem('**authorization_token**')
-
-## Additional (optional) tasks - recommended for personal growth and further interviews, but this part would not be evauated on cross-check
-
+Provide your reviewers with the following information:
+- link to the repo
+- **product-service** service API endpoint URL
+- example of the **create product** API call with all needed information: URL, payload, headers, etc.
+- **CART** service API endpoint URL
+- **bff-service** service URL
+- example how to call **product-service** and **CART** services via **bff-service** service URL   
 ---
+* **3** - A working and correct **express** application should be in the **bff-service** folder. Reviewer can start this application locally with any valid configuration in the **.env** file and this application should works as described in the task 9.1
+* **5** - The **bff-service** should be deployed with Elastic Beanstalk. The **bff-service** call should be redirected to the appropriate service : **product-service** or **CART**. The response from the **bff-service** should be the same as if **product-service** or **CART** services were called directly.
+ 
+## Additional (optional) tasks
+---
+* **+1** - Add a cache at the **bff-service** level for a request to the **getProductsList** function of the **product-service**. The cache should expire in 2 minutes.  
+How to test:
+  * Get products list
+  * Create new product
+  * Get products list - result shouldn’t have new product
+  * Wait more than 2 minutes
+  * Get products list - result should have new product
+* **+1** - Use **NestJS** to create **bff-service** instead of **express**
 
-- **+1** - Client application should display alerts for the responses in 401 and 403 HTTP statuses. This behavior should be added to the **nodejs-aws-fe-main/src/index.tsx** file
-- **just practice, no evaluation** - Add Login page and protect **getProducts** lambda by the Cognito Authorizer
-  - Create Cognito User Pool using a demo from the lecture. Leave **email** in a list of standard required attributes. Checkbox **Allow users to sign themselves up** should be checked. Also, set **email** as an attribute that you want to verify.
-  - Add **App Client** to the User Pool
-  - In the **App client settings** section select all **Identity Providers**. Fill the **Callback URL(s)** field with your Client Application URL (f.e. http://localhost:3000/). Allow only **Implicit grant** OAuth Flow. Allow all **OAuth Scopes**
-  - Create Domain name
-  - After all of these manipulations, you can open your **login page** by clicking on the **Launch Hosted UI** link in the **App client settings**
-  - Provide this link to your reviewers. The reviewer can just confirm that everything works for him too.
-  - Add Cognito authorizer to the **getProducts** lambda. Use **Authorization** as a **Token Source**
-  - How to make sure that everything works as expected:
-    - Open login page and **Sign up** a new user. Use a real email address to create this user
-    - Verify user using code from the email
-    - After verification and after every login you will be redirected to the Client application. URL should contain **id_token** which can be used to access the **getProducts** lambda
-    - Call **getProducts** lambda using **id_token** as a value for the **Authorization** header
-  - Remove authorization from the **getProducts** after your task will be checked
+Link to FE MR: https://github.com/belspirit/shop-react-redux-cloudfront/pulls
 
-LInk to FE MR (YOUR OWN REPOSITORY): https://github.com/belspirit/shop-react-redux-cloudfront/pulls
+link to FE: https://drd0gsvtihjd.cloudfront.net/
