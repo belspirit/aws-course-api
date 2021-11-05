@@ -1,0 +1,26 @@
+{
+  "name": "bff-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "eb:init": "eb init --platform node.js -r us-east-1",
+    "eb:create": "eb create --single --cname belspirit-bff-api-dev",
+    "eb:create2": "eb create development --single --envvars NODE_ENV=production,ENV_CONFIG=dev",
+    "eb:deploy": "eb deploy",
+    "eb:terminate": "eb terminate",
+    "eb:setenv": "ev setenv `cat .env | sed '/^#/ d' | sed '/^$/ d'`",
+    "test": "jest"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.14"
+  }
+}
