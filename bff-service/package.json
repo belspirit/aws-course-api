@@ -10,7 +10,7 @@
     "eb:create2": "eb create development --single --envvars NODE_ENV=production,ENV_CONFIG=dev",
     "eb:deploy": "eb deploy",
     "eb:terminate": "eb terminate",
-    "eb:setenv": "ev setenv `cat .env | sed '/^#/ d' | sed '/^$/ d'`",
+    "eb:setenv": "eb setenv `cat .env | sed '/^#/ d' | sed '/^$/ d'`",
     "test": "jest"
   },
   "author": "",
