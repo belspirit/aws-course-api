@@ -27,7 +27,7 @@ app.all("/*", (req, res) => {
     const axiosConfig = {
       method: req.method,
       url: `${recipientURL}${recipientPath}`,
-      ...(Object.keys(req.body || {}).length > 0 && { data: req.body }),
+      ...(Object.keys(req.body || {}).length > 0 && { data: req.body })
     };
 
     // getProductsList cache
@@ -53,7 +53,7 @@ app.all("/*", (req, res) => {
         }
 
         console.log("response from recipient", response.data);
-        res.status(res.statusCode).json(response.data);
+        res.status(response.status).json(response.data);
       })
       .catch(error => {
         console.log("recipient error: ", JSON.stringify(error));
