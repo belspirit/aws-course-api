@@ -17,6 +17,17 @@ and
 https://3glaghfyo8.execute-api.us-east-1.amazonaws.com/dev/profile/cart
 http://belspirit-bff-api-dev.us-east-1.elasticbeanstalk.com/cart/profile/cart
 
+## To run locally
+
+Add environment variables to `.env` file:
+
+````
+NODE_ENV=production
+product=https://ivc3b2mfeb.execute-api.us-east-1.amazonaws.com
+cart=https://3glaghfyo8.execute-api.us-east-1.amazonaws.com/dev
+import=https://yzurk88fkb.execute-api.us-east-1.amazonaws.com/dev
+```
+
 ## Prerequisites
 
 ---
@@ -42,7 +53,7 @@ Create a folder for the **bff-service** in the same level as for other services 
 - Make a new request to the needed service using the appropriate **method** and **recipientURL**
 - **bff-service** should return the result of the recipient’s request
 
-If **bff-service** cannot find **recipientURL** by the **{recipient-service-name}**, return a 'Cannot process request’ error message with status 502.  
+If **bff-service** cannot find **recipientURL** by the **{recipient-service-name}**, return a 'Cannot process request’ error message with status 502.
 **bff-service** should return the same status code and error message that the recipient service returns to the **bff-service** in case of any error on the recipient service side.
 
 ## TASK 9.2
@@ -56,7 +67,7 @@ Deploy **bff-service** with Elastic Beanstalk.
 - Use the **--cname** option **{yours_github_account_login}-bff-api-{environment_name}**
 - Use the **--single** option
 
-**bff-service** should work only with requests from the **product-service** and **CART** services.  
+**bff-service** should work only with requests from the **product-service** and **CART** services.
 All **product-service** and **CART** services methods should work correctly if requested via **bff-service**
 
 ## Evaluation criteria (each mark includes previous mark criteria)
@@ -81,7 +92,7 @@ Provide your reviewers with the following information:
 
 ---
 
-- **+1** - Add a cache at the **bff-service** level for a request to the **getProductsList** function of the **product-service**. The cache should expire in 2 minutes.  
+- **+1** - Add a cache at the **bff-service** level for a request to the **getProductsList** function of the **product-service**. The cache should expire in 2 minutes.
   How to test:
   - Get products list
   - Create new product
@@ -93,3 +104,4 @@ Provide your reviewers with the following information:
 Link to FE MR: https://github.com/belspirit/shop-react-redux-cloudfront/pulls
 
 link to FE: https://drd0gsvtihjd.cloudfront.net/
+````

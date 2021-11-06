@@ -8,8 +8,6 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "docker:build": "docker build --tag cart-api .",
-    "docker:run": "docker run -p 8080:8080 cart-api",
     "eb:init": "eb init --platform node.js -r us-east-1",
     "eb:create": "eb create --single --cname belspirit-bff-api-dev",
     "eb:create2": "eb create development --single --envvars NODE_ENV=production,ENV_CONFIG=dev",
