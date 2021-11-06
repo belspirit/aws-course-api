@@ -1,6 +1,6 @@
 # Task 9 (Backend For Frontend)
 
-Score: 6/7
+Score: 7/7
 
 BFF Url: http://belspirit-bff-api-dev.us-east-1.elasticbeanstalk.com
 
