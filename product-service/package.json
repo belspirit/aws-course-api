@@ -6,6 +6,7 @@
   "scripts": {
     "build": "sls package",
     "deploy": "sls deploy",
+    "remove": "sls remove",
     "invoke-local": "serverless invoke local --function getProductsList",
     "test": "jest --watch"
   },

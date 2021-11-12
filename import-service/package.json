@@ -6,6 +6,7 @@
   "scripts": {
     "build": "sls package",
     "deploy": "serverless deploy --stage dev",
+    "remove": "serverless remove --stage dev",
     "test": "jest --watch"
   },
   "author": "",
